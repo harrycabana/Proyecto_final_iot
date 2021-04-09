@@ -128,21 +128,21 @@ void ec25BorrarBufferTX(void){
 	}
 }
 //------------------------------------
-void waytTimeModem(void) {
+void waitTimeModem(void) {
 	uint32_t tiempo = 0xFFFF;
 	do {
 		tiempo--;
 	} while (tiempo != 0x0000);
 }
 //------------------------------------
-void waytTimeCFUN1(void) {
+void waitTimeCFUN1(void) {
 	uint32_t tiempo = 0xFFFFFF;
 	do {
 		tiempo--;
 	} while (tiempo != 0x0000);
 }
 //------------------------------------
-void waytTime1000(void) {
+void waitTime1000(void) {
 	uint32_t tiempo = 0xFFFFF;
 	do {
 		tiempo--;
@@ -156,7 +156,7 @@ void mensajeMQTT(){
 
 			sprintf((char *)(&msj[0]),"temperatura,%i,humedad,%i",temp,hum);
 			printf("%s%c",msj,0x1A);
-			waytTime1000();
+			waitTime1000();
 
 }
 /*******************************************************************************
@@ -198,7 +198,7 @@ status_t detectarModemQuectel(void){
 
 	ec25BorrarBufferRX();	//limpia buffer para recibir datos de quectel
 	do {
-		waytTimeModem();
+		waitTimeModem();
 		contador_tiempo_ms++;
 
 		if (uart0CuantosDatosHayEnBuffer() > 0) {
@@ -234,18 +234,18 @@ uint8_t ec25Polling(void){
 		break;
 
 	case kFSM_ENVIANDO_AT:
-		//printf("Enviando AT:");
 		ec25BorrarBufferRX();	                    //limpia buffer para recibir datos de quectel
-		ec25EnviarComandoAT(kAT);	                //Envia comando AT
+		printf("%s\r\n", ec25_comandos_at[kAT]);	//Envia comando AT
+
 		ec25_fsm.anterior = ec25_fsm.actual;		//almacena el estado actual
 		ec25_fsm.actual = kFSM_ESPERANDO_RESPUESTA;	//avanza a esperar respuesta del modem
 		ec25_timeout = 0;	                        //reset a contador de tiempo
 		break;
 
 	case kFSM_ENVIANDO_ATI:
-		//printf("Enviando ATI:");
 		ec25BorrarBufferRX();	                    //limpia buffer para recibir datos de quectel
-		ec25EnviarComandoAT(kATI);	                //Envia comando ATI
+		printf("%s\r\n", ec25_comandos_at[kATI]);	//Envia comando AT
+
 		ec25_fsm.anterior = ec25_fsm.actual;		//almacena el estado actual
 		ec25_fsm.actual = kFSM_ESPERANDO_RESPUESTA;	//avanza a esperar respuesta del modem
 		ec25_timeout = 0;	                        //reset a contador de tiempo
@@ -382,7 +382,7 @@ uint8_t ec25Polling(void){
 
 		ec25_fsm.anterior = ec25_fsm.actual;		//almacena el estado actual
 		ec25_fsm.actual = kFSM_ESPERANDO_RESPUESTA;	//avanza a esperar respuesta del modem
-		waytTimeCFUN1();
+		waitTimeCFUN1();
 		ec25_timeout = 0;	//reset a contador de tiempo
 		break;
 
@@ -417,11 +417,12 @@ uint8_t ec25Polling(void){
 				puntero_ok = (uint8_t*) (strstr((char*) (&ec25_buffer_rx[0]),(char*) (ec25_repuestas_at[kAT])));
 
 				if(puntero_ok!=0x00){
-					printf("OK\r\n");
-					resultado_procesamiento=kStatus_Success;
+					ec25_fsm.anterior = ec25_fsm.actual;		//almacena el estado actual
+					ec25_fsm.actual = kFSM_ENVIANDO_ATI;		//avanza a enviar nuevo comando al modem
 				}else{
-					printf("ERROR\r\n");
-					resultado_procesamiento=kStatus_Fail;
+					//Si la respuesta es incorrecta, se queda en estado de error
+					//No se cambia (ec25_fsm.anterior) para mantener en que comando AT fue que se generó error
+					ec25_fsm.actual = kFSM_RESULTADO_ERROR;		//se queda en estado de error
 				}
 
 				break;
@@ -431,11 +432,12 @@ uint8_t ec25Polling(void){
 						(char*) (ec25_repuestas_at[kATI])));
 
 				if(puntero_ok!=0x00){
-					printf("OK\r\n");
-					resultado_procesamiento=kStatus_Success;
+					ec25_fsm.anterior = ec25_fsm.actual;		//almacena el estado actual
+					ec25_fsm.actual = kFSM_ENVIANDO_CPIN;		//avanza a enviar nuevo comando al modem
 				}else{
-					printf("ERROR\r\n");
-					resultado_procesamiento=kStatus_Fail;
+					//Si la respuesta es incorrecta, se queda en estado de error
+					//No se cambia (ec25_fsm.anterior) para mantener en que comando AT fue que se generó error
+					ec25_fsm.actual = kFSM_RESULTADO_ERROR;		//se queda en estado de error
 				}
 				break;
 			case kFSM_ENVIANDO_CPIN:
@@ -632,7 +634,7 @@ uint8_t ec25Polling(void){
 					//Si la respuesta es encontrada, se avanza al siguiente estado
 					ec25_fsm.anterior = ec25_fsm.actual;		//almacena el estado actual
 					ec25_fsm.actual = kFSM_ENVIANDO_CFUN_0;		//avanza a enviar nuevo comando al modem
-					waytTime();
+
 				}else{
 					//Si la respuesta es incorrecta, se queda en estado de error
 					//No se cambia (ec25_fsm.anterior) para mantener en que comando AT fue que se generó error
