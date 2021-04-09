@@ -1,5 +1,5 @@
 /*! @file : sdk_pph_ec25au.h
- * @author  Ernesto Andres Rincon Cruz
+ * @author  Harrison Cabana
  * @version 1.0.0
  * @date    23/01/2021
  * @brief   Driver para modem EC25AU
@@ -28,11 +28,20 @@ enum _ec25_lista_comandos_at {
 	kAT = 0,
 	kATI,
 	kAT_CPIN,
+	kAT_QCFG_nwscanmode,
+	kAT_QCFG_band,
+	kAT_QCSQ,
 	kAT_CREG,
-	kAT_CMGF_1,
-	kAT_CMGS,
-	kAT_TEXT_MSG_END,
-	kAT_CSQ,
+	kAT_CGREG,
+	kAT_CEREG,
+	kAT_CGDCONT,
+	kAT_QIACT,
+	kAT_QMTOPEN,
+	kAT_QMTCONN,
+	kAT_QMTPUB,
+	kAT_MSJ_MQTT,
+	kAT_CFUN_0,
+	kAT_CFUN_1,
 };
 
 enum _fsm_ec25_state{
@@ -40,19 +49,26 @@ enum _fsm_ec25_state{
 	kFSM_ENVIANDO_AT,
 	kFSM_ENVIANDO_ATI,
 	kFSM_ENVIANDO_CPIN,
+	kFSM_ENVIANDO_QCFG_nwscanmode,
+	kFSM_ENVIANDO_QCFG_band,
+	kFSM_ENVIANDO_QCSQ,
 	kFSM_ENVIANDO_CREG,
-	kFSM_ENVIANDO_CMGF,
-	kFSM_ENVIANDO_CMGS,
-	kFSM_ENVIANDO_MENSAJE_TXT,
+	kFSM_ENVIANDO_CGREG,
+	kFSM_ENVIANDO_CEREG,
+	kFSM_ENVIANDO_CGDCONT,
+	kFSM_ENVIANDO_QIACT,
+	kFSM_ENVIANDO_QMTOPEN,
+	kFSM_ENVIANDO_QMTCONN,
+	kFSM_ENVIANDO_QMTPUB,
+	kFSM_ENVIANDO_MENSAJE_MQTT, //enviando mensaje
+	kFSM_ENVIANDO_CFUN_0,
+	kFSM_ENVIANDO_CFUN_1,		//reiniciando modem
 	kFSM_ESPERANDO_RESPUESTA,
 	kFSM_RESULTADO_ERROR,
-	kFSM_RESULTADO_EXITOSO,
-	kFSM_ENVIANDO_CSQ,
-	kFSM_PROCESANDO_RESPUESTA,
-	kFSM_RESULTADO_ERROR_RSSI,
+	kFSM_RESULTADO_EXITOSO
 };
 
-#define EC25_TIEMPO_MAXIMO_ESPERA	3		//Tiempo maximo que espera modem por respuesta
+#define EC25_TIEMPO_MAXIMO_ESPERA	1		//Tiempo maximo que espera modem por respuesta
 #define EC25_RSSI_MINIMO_ACEPTADO	20		//RSSI minimo aceptado segun tabla de fabricante
 /*******************************************************************************
  * External vars
