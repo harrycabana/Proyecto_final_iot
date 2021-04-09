@@ -143,7 +143,7 @@ void waytTimeCFUN1(void) {
 }
 //------------------------------------
 void waytTime1000(void) {
-	uint32_t tiempo = 0x3E8;
+	uint32_t tiempo = 0xFFFFF;
 	do {
 		tiempo--;
 	} while (tiempo != 0x0000);
